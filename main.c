@@ -8,6 +8,8 @@ void CANinit(void);
 interrupt 38 void RxISR(void);
 unsigned char CANSend(unsigned long id, unsigned char priority, unsigned char length, unsigned char *txdata);
 
+volatile unsigned char rxdata[8];
+
 void main(void) 
 {
 
@@ -15,7 +17,7 @@ void main(void)
   //unsigned char errorflag = NO_ERR;
   unsigned char txbuff[] = "Josh";
   
-    SET_TCNT_PRESCALE( TCNT_PRESCALE_8);
+  SET_TCNT_PRESCALE( TCNT_PRESCALE_8);
   TSCR1 = TSCR1_INIT;
   
 	//SET_TCNT_PRESCALE( TCNT_PRESCALE_8);
@@ -34,7 +36,7 @@ void main(void)
 	for(;;) 
 	{
     CANSend(0xFF, 0x00, sizeof(txbuff)-1, txbuff);
-	
+	    LCDprintf("%s", rxdata);
 	msDELAY(100);
 	//_FEED_COP(); /* feeds the dog */
 }
@@ -133,13 +135,12 @@ Interupt Service Routine for CAN Recieve
 interrupt 38 void RxISR(void) 
 {
   unsigned char length, index;
-  unsigned char rxdata[8];
+
   
   length = (CANRXDLR & 0x0F);  
   
   for (index=0; index<length; index++)
     rxdata[index] = *(&CANRXDSR0 + index); /* Get received data */
-  LCDprintf("%s", rxdata);
   
   CANRFLG = 0x01; /* Clear RXF */  
 }
