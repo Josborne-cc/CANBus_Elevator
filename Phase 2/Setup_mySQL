@@ -1,0 +1,28 @@
+/*
+Steps for clean install of mySQL server
+
+Author: Josh Osborne
+*/
+
+1) Naviagte to the directory
+
+2) Unpack the .deb
+	- select the default configuration
+	shell> sudo dpkg -i mysql-apt-config_w.x.y-z_all.deb 
+
+3) Update the system
+	shell> sudo apt-get update
+
+4) Install mySQL
+	shell> sudo apt-get install mysql-server
+
+Additonal Notes:
+
+1) Check the status of the server
+	shell> sudo service mysql status
+
+2) Start the server
+	shell> sudo service mysql start
+
+3) Stop the server
+	shell> sudo service mysql stop
