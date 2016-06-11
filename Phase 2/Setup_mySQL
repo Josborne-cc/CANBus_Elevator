@@ -16,6 +16,20 @@ Author: Josh Osborne
 4) Install mySQL
 	shell> sudo apt-get install mysql-server
 
+5) Install the C development libraries
+	shell> sudo apt-get install libmysqlclient-dev
+
+ADD A USER
+
+1) Create the user
+	CREATE USER 'user'@'localhost' IDENTIFIED BY 'password';
+
+2) Set the permissions
+	GRANT ALL PRIVILEGES ON * . * TO 'user'@'localhost';
+
+3) Finish up
+	FLUSH PRIVILEGES;
+
 Additonal Notes:
 
 1) Check the status of the server
@@ -26,3 +40,7 @@ Additonal Notes:
 
 3) Stop the server
 	shell> sudo service mysql stop
+
+REFERENCES
+
+1) https://www.digitalocean.com/community/tutorials/a-basic-mysql-tutorial
