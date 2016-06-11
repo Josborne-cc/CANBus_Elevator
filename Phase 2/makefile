@@ -1,7 +1,7 @@
 CC = g++
 
-CFLAGS = -Wall -std=c++11
-LFLAGS = -L/usr/lib -lmysqlcppconn
+CFLAGS = -Wall -std=c++11 
+LFLAGS = -L/usr/lib -lmysqlcppconn -lboost_system
 IFLAGS =  -I/usr/include/cppconn
 
 default: run
@@ -13,4 +13,4 @@ run.o: main.cpp
 	$(CC) $(CFLAGS) -c main.cpp
 
 clean:
-	$(RM) run *.o *~
+	$(RM) *.o *~
