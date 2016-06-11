@@ -6,11 +6,11 @@ IFLAGS =  -I/usr/include/cppconn
 
 default: run
 
-run: run.o
-	$(CC) $(CFLAGS) -o run run.o
+run: main.o
+	$(CC) $(CFLAGS) $(IFLAGS) -o run main.o $(LFLAGS)
 
 run.o: main.cpp
 	$(CC) $(CFLAGS) -c main.cpp
 
 clean:
-$(RM) run *.o *~
+	$(RM) run *.o *~

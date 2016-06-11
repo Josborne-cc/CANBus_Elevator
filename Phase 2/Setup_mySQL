@@ -19,6 +19,12 @@ Author: Josh Osborne
 5) Install the C development libraries
 	shell> sudo apt-get install libmysqlclient-dev
 
+6) Install the connector libraries
+	sudo apt-get install  libmysqlcppconn-dev
+
+7) Install boost
+	sudo apt-get install libboost-all-dev
+
 ADD A USER
 
 1) Create the user

@@ -21,7 +21,7 @@ stmt = con->createStatement();
 stmt->execute("USE CAN");
 stmt->execute("DROP TABLE IF EXISTS test");
 stmt->execute("CREATE TABLE test(id INT, label CHAR(1))");
-stmt->execute("INSERT INTO test(id, label) VALUES (3, 'x')");
+stmt->execute("INSERT INTO test(id, label) VALUES (6, 'z')");
 
 delete stmt;
 delete con;
