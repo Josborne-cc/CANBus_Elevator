@@ -1,16 +1,22 @@
 CC = g++
 
 CFLAGS = -Wall -std=c++11 
-LFLAGS = -L/usr/lib -lmysqlcppconn -lboost_system
+LFLAGS = -L/usr/lib -lmysqlcppconn -lboost_system -lboost_thread
 IFLAGS =  -I/usr/include/cppconn
 
 default: run
 
-run: main.o
-	$(CC) $(CFLAGS) $(IFLAGS) -o run main.o $(LFLAGS)
+run: AsyncSerial.o BufferedAsyncSerial.o  main.o
+	$(CC) $(CFLAGS) $(IFLAGS) -o run  AsyncSerial.o BufferedAsyncSerial.o main.o $(LFLAGS)
 
-run.o: main.cpp
+main.o: main.cpp
 	$(CC) $(CFLAGS) -c main.cpp
+
+BufferedAsyncSerial.o: BufferedAsyncSerial.cpp BufferedAsyncSerial.h
+	$(CC) $(CFLAGS) -c BufferedAsyncSerial.cpp
+
+AsyncSerial.o: AsyncSerial.cpp AsyncSerial.h
+	$(CC) $(CFLAGS) -c AsyncSerial.cpp
 
 clean:
 	$(RM) *.o *~

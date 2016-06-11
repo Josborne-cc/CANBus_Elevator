@@ -16,6 +16,8 @@ Version: 1
 #include <cppconn/statement.h>
 #include <boost/asio/serial_port.hpp> 
 #include <boost/asio.hpp>
+#include "AsyncSerial.h"
+#include "BufferedAsyncSerial.h"
 
 /*int main(void)
 {
@@ -41,7 +43,7 @@ Version: 1
 	return 0;
 }*/
  
-int main (void) 
+/*int main (void) 
 {
 	boost::asio::io_service io;
 	boost::asio::serial_port port(io);
@@ -63,4 +65,41 @@ int main (void)
 	port.close();
 
 	return 0;
+}*/
+
+
+
+
+//using namespace std;
+//using namespace boost;
+
+int main(int argc, char* argv[])
+{
+	char data;
+
+    try {
+        BufferedAsyncSerial serial("/dev/ttyUSB0",9600);
+
+        //Return immediately. String is written *after* the function returns,
+        //in a separate thread.
+        serial.writeString("Hello world\n");
+
+        //Simulate doing something else while the serial device replies.
+        //When the serial device replies, the second thread stores the received
+        //data in a buffer.
+        boost::this_thread::sleep(boost::posix_time::seconds(2));
+	//sleep(3);
+
+        //Always returns immediately. If the terminator \r\n has not yet
+        //arrived, returns an empty string.
+        //cout<<serial.readStringUntil("\r\n")<<endl;
+	std::cout << serial.read(&data, '3') << std::endl;
+
+        serial.close();
+ 
+    } catch(boost::system::system_error& e)
+    {
+        std::cout <<"Error: " << e.what() << std::endl;
+        return 1;
+    }
 }
