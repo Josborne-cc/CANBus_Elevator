@@ -1,15 +1,17 @@
 /*
 Purpose: Program to store data from the serial port in a database
  Author: Josh Osborne
-   Date: June 10, 2016
-Version: 1
+   Date: June 23, 2016
+Version: 2
 */
 
 #include <stdlib.h>
 #include <iostream>
 #include <string>
+#include <thread>
 #include "mysql_connection.h"
 #include "mysql_driver.h"
+#include "queue.h"
 #include <cppconn/driver.h>
 #include <cppconn/exception.h>
 #include <cppconn/resultset.h>
@@ -23,33 +25,27 @@ Version: 1
 using std::cout;
 using std::endl;
 
-/*int main(void)
-{
-	sql::mysql::MySQL_Driver *driver;	// Connect to mySQL database
-	sql::Connection *con;			// Allow use of mySQL functions
-	sql::Statement *stmt;			// Used to perform tasks		
+void Read_Serial();
+void Write_DB();
 
-	// Connect to the database
-	driver = sql::mysql::get_mysql_driver_instance();
-	con = driver->connect("tcp://127.0.0.1:3306", "user", "password");
-
-	// Create statement
-	stmt = con->createStatement();
-	// MySQL code
-	stmt->execute("USE CAN");
-	stmt->execute("DROP TABLE IF EXISTS test");
-	stmt->execute("CREATE TABLE test(id INT, label CHAR(1))");
-	stmt->execute("INSERT INTO test(id, label) VALUES (6, 'z')");
-
-	delete stmt;
-	delete con;
-
-	return 0;
-}*/
+Queue Serial_Recieve;
 
 int main(int argc, char* argv[])
 {
+	std::thread t1;
+	std::thread t2;
+	
+	t1(Read_Serial);
+	t2(Write_DB);
+	
+	t1.join();
+	t2.join();
 
+	return 0;
+}
+
+Void Write_DB()
+{
 	try {
 		std::string s;
 		sql::mysql::MySQL_Driver *driver;	// Connect to mySQL database
@@ -74,10 +70,42 @@ int main(int argc, char* argv[])
 		stmt->execute("CREATE TABLE Logging(id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, Node CHAR(1), Inst CHAR(1), CMD CHAR(1))");
 		pstmt = con->prepareStatement("INSERT INTO Logging(Node, Inst, CMD) VALUES (?, ?, ?)");
 
-		//std::auto_ptr< sql::PreparedStatement >  pstmt;
-		//pstmt.reset(con->prepareStatement("INSERT INTO Logging(Node, Inst, CMD) VALUES (?, ?, ?)"));
 
-		try {
+		for(;;)
+		{
+			if(!Read_Serial.empty())
+			{
+				s = Serial_Recieve.pop();
+				cout << "db string: " << s < endl;
+				pstmt->setString(1, s.substr(0,1));
+				pstmt->setString(2, s.substr(1,1));
+				pstmt->setString(3, s.substr(2,1));
+				
+				int result = pstmt->execute();
+				std::cout << "result: " << result << std::endl;
+			}
+
+		}
+
+		delete stmt;
+		delete pstmt;
+		delete con;
+
+	} catch (sql::SQLException &e) 
+	{
+	  std::cout << "# ERR: SQLException in " << __FILE__;
+	  std::cout << "(" << __FUNCTION__ << ") on line "   << __LINE__ << std::endl;
+	  std::cout << "# ERR: " << e.what();
+	  std::cout << " (MySQL error code: " << e.getErrorCode();
+	  std::cout << ", SQLState: " << e.getSQLState() <<  " )" << std::endl;
+	}
+}
+
+void Read_Serial()
+{
+	std::string s;
+	
+	try {
 			BufferedAsyncSerial serial("/dev/ttyUSB0",9600);
 	
 			for(;;)
@@ -92,20 +120,9 @@ int main(int argc, char* argv[])
 				s += serial.readString();		
 				if(s.length() == 3)
 				{
-					std::cout << s << std::endl;
-					//pstmt = con->prepareStatement("INSERT INTO Logging(Node, Inst, CMD) VALUES (?, ?, ?)");
-					//stmt->execute("INSERT INTO Logging(Node, Inst, CMD) VALUES (?,?,?)");
-					pstmt->setString(1, s.substr(0,1));
-					pstmt->setString(2, s.substr(1,1));
-					pstmt->setString(3, s.substr(2,1));
-					//pstmt->setString(1, "2");
-					//pstmt->setString(2, "0");
-					//pstmt->setString(3, "5");
-					int result = pstmt->execute();
-					std::cout << result << std::endl;
+					std::cout << "serial: " << s << std::endl;
+					Serial_Recieve.push(s);
 					s.clear();
-				
-					//delete pstmt; 
 				}
 			
 
@@ -120,20 +137,4 @@ int main(int argc, char* argv[])
 			std::cout <<"Error: " << e.what() << std::endl;
 			return 1;
 		}
-
-		delete stmt;
-		delete pstmt;
-		delete con;
-		//driver->threadEnd();
-
-	} catch (sql::SQLException &e) 
-	{
-	  std::cout << "# ERR: SQLException in " << __FILE__;
-	  std::cout << "(" << __FUNCTION__ << ") on line "   << __LINE__ << std::endl;
-	  std::cout << "# ERR: " << e.what();
-	  std::cout << " (MySQL error code: " << e.getErrorCode();
-	  std::cout << ", SQLState: " << e.getSQLState() <<  " )" << std::endl;
-	}
-
-	return 0;
 }
