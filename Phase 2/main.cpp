@@ -20,6 +20,9 @@ Version: 1
 #include "AsyncSerial.h"
 #include "BufferedAsyncSerial.h"
 
+using std::cout;
+using std::endl;
+
 /*int main(void)
 {
 	sql::mysql::MySQL_Driver *driver;	// Connect to mySQL database
@@ -46,56 +49,91 @@ Version: 1
 
 int main(int argc, char* argv[])
 {
-	std::string s;
-	sql::mysql::MySQL_Driver *driver;	// Connect to mySQL database
-	sql::Connection *con;			// Allow use of mySQL functions
-	sql::Statement *stmt;			// Used to perform tasks
-	sql::PreparedStatement *pstmt;
-
-	// Connect to mySQL
-	driver = sql::mysql::get_mysql_driver_instance();
-	con = driver->connect("tcp://127.0.0.1:3306", "user", "password");
-
-	// Create statement
-	stmt = con->createStatement();
-
-	stmt->execute("USE CAN");
-	stmt->execute("DROP TABLE IF EXISTS Logging");
-	stmt->execute("CREATE TABLE Logging(id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, Node CHAR(1), Inst CHAR(1), CMD CHAR(1))");
-	pstmt = con->prepareStatement("INSERT INTO Logging(Node, Inst, CMD) VALUES (?, ?, ?)");
 
 	try {
-		BufferedAsyncSerial serial("/dev/ttyUSB1",9600);
+		std::string s;
+		sql::mysql::MySQL_Driver *driver;	// Connect to mySQL database
+		sql::Connection *con;			// Allow use of mySQL functions
+		sql::Statement *stmt;			// Used to perform tasks
+		sql::PreparedStatement *pstmt;
+
+		int last = 0;
+
+		// Connect to mySQL
+		driver = sql::mysql::get_mysql_driver_instance();
+		con = driver->connect("tcp://127.0.0.1:3306", "user", "password");
+
+		//driver->threadInit();
+
+		// Create statement
+		stmt = con->createStatement();
+
+		//stmt->execute("USE CAN");
+		con->setSchema("CAN");
+		stmt->execute("DROP TABLE IF EXISTS Logging");
+		stmt->execute("CREATE TABLE Logging(id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, Node CHAR(1), Inst CHAR(1), CMD CHAR(1))");
+		pstmt = con->prepareStatement("INSERT INTO Logging(Node, Inst, CMD) VALUES (?, ?, ?)");
+
+		//std::auto_ptr< sql::PreparedStatement >  pstmt;
+		//pstmt.reset(con->prepareStatement("INSERT INTO Logging(Node, Inst, CMD) VALUES (?, ?, ?)"));
+
+		try {
+			BufferedAsyncSerial serial("/dev/ttyUSB0",9600);
 	
-		for(;;)
-		{
-		
-			s += serial.readString();		
-			if(s.length() == 3)
+			for(;;)
 			{
-				std::cout << s << std::endl;
-				//stmt->execute("INSERT INTO Logging(Node, Inst, CMD) VALUES ('"s.at(1)"', '"s.at(2)"', '"s.at(3)"')");
-				pstmt->setString(1, s.substr(0,1));
-				pstmt->setString(1, s.substr(1,2));
-				pstmt->setString(1, s.substr(2,3));
-				//pstmt->setChar(2, '0');
-				//pstmt->setString(3, "5");
-				//pstmt->execute();
-				s.clear();
+		
+				if(last != s.length())
+				{
+					last = s.length();
+					cout << "length: " << last << endl;
+				}
+
+				s += serial.readString();		
+				if(s.length() == 3)
+				{
+					std::cout << s << std::endl;
+					//pstmt = con->prepareStatement("INSERT INTO Logging(Node, Inst, CMD) VALUES (?, ?, ?)");
+					//stmt->execute("INSERT INTO Logging(Node, Inst, CMD) VALUES (?,?,?)");
+					pstmt->setString(1, s.substr(0,1));
+					pstmt->setString(2, s.substr(1,1));
+					pstmt->setString(3, s.substr(2,1));
+					//pstmt->setString(1, "2");
+					//pstmt->setString(2, "0");
+					//pstmt->setString(3, "5");
+					int result = pstmt->execute();
+					std::cout << result << std::endl;
+					s.clear();
+				
+					//delete pstmt; 
+				}
+			
+
+			
+
 			}
 
+			serial.close();
+
+		} catch(boost::system::system_error& e)
+		{
+			std::cout <<"Error: " << e.what() << std::endl;
+			return 1;
 		}
 
-		serial.close();
+		delete stmt;
+		delete pstmt;
+		delete con;
+		//driver->threadEnd();
 
-	} catch(boost::system::system_error& e)
+	} catch (sql::SQLException &e) 
 	{
-		std::cout <<"Error: " << e.what() << std::endl;
-		return 1;
+	  std::cout << "# ERR: SQLException in " << __FILE__;
+	  std::cout << "(" << __FUNCTION__ << ") on line "   << __LINE__ << std::endl;
+	  std::cout << "# ERR: " << e.what();
+	  std::cout << " (MySQL error code: " << e.getErrorCode();
+	  std::cout << ", SQLState: " << e.getSQLState() <<  " )" << std::endl;
 	}
-
-	delete stmt;
-	delete con;
 
 	return 0;
 }
