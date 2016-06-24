@@ -14,10 +14,14 @@ Version: 1
 #include <cppconn/exception.h>
 #include <cppconn/resultset.h>
 #include <cppconn/statement.h>
+#include <cppconn/prepared_statement.h>
 #include <boost/asio/serial_port.hpp> 
 #include <boost/asio.hpp>
 #include "AsyncSerial.h"
 #include "BufferedAsyncSerial.h"
+
+using std::cout;
+using std::endl;
 
 /*int main(void)
 {
@@ -42,64 +46,94 @@ Version: 1
 
 	return 0;
 }*/
- 
-/*int main (void) 
-{
-	boost::asio::io_service io;
-	boost::asio::serial_port port(io);
- 
-	port.open("/dev/ttyUSB0");
-	port.set_option(boost::asio::serial_port_base::baud_rate(9600));
- 
-	char c;
- 
-	// Read 1 character into c, this will block
-	// forever if no character arrives.
-	boost::asio::read(port, boost::asio::buffer(&c,1));
-	std::cout << "c: " << c << std::endl;
-	boost::asio::read(port, boost::asio::buffer(&c,1));
-	std::cout << "c: " << c << std::endl;
-	boost::asio::read(port, boost::asio::buffer(&c,1));
-	std::cout << "c: " << c << std::endl;
- 
-	port.close();
-
-	return 0;
-}*/
-
-
-
-
-//using namespace std;
-//using namespace boost;
 
 int main(int argc, char* argv[])
 {
-	char data;
 
-    try {
-        BufferedAsyncSerial serial("/dev/ttyUSB0",9600);
+	try {
+		std::string s;
+		sql::mysql::MySQL_Driver *driver;	// Connect to mySQL database
+		sql::Connection *con;			// Allow use of mySQL functions
+		sql::Statement *stmt;			// Used to perform tasks
+		sql::PreparedStatement *pstmt;
 
-        //Return immediately. String is written *after* the function returns,
-        //in a separate thread.
-        serial.writeString("Hello world\n");
+		int last = 0;
 
-        //Simulate doing something else while the serial device replies.
-        //When the serial device replies, the second thread stores the received
-        //data in a buffer.
-        boost::this_thread::sleep(boost::posix_time::seconds(2));
-	//sleep(3);
+		// Connect to mySQL
+		driver = sql::mysql::get_mysql_driver_instance();
+		con = driver->connect("tcp://127.0.0.1:3306", "user", "password");
 
-        //Always returns immediately. If the terminator \r\n has not yet
-        //arrived, returns an empty string.
-        //cout<<serial.readStringUntil("\r\n")<<endl;
-	std::cout << serial.read(&data, '3') << std::endl;
+		//driver->threadInit();
 
-        serial.close();
- 
-    } catch(boost::system::system_error& e)
-    {
-        std::cout <<"Error: " << e.what() << std::endl;
-        return 1;
-    }
+		// Create statement
+		stmt = con->createStatement();
+
+		//stmt->execute("USE CAN");
+		con->setSchema("CAN");
+		stmt->execute("DROP TABLE IF EXISTS Logging");
+		stmt->execute("CREATE TABLE Logging(id INT NOT NULL PRIMARY KEY AUTO_INCREMENT, Node CHAR(1), Inst CHAR(1), CMD CHAR(1))");
+		pstmt = con->prepareStatement("INSERT INTO Logging(Node, Inst, CMD) VALUES (?, ?, ?)");
+
+		//std::auto_ptr< sql::PreparedStatement >  pstmt;
+		//pstmt.reset(con->prepareStatement("INSERT INTO Logging(Node, Inst, CMD) VALUES (?, ?, ?)"));
+
+		try {
+			BufferedAsyncSerial serial("/dev/ttyUSB0",9600);
+	
+			for(;;)
+			{
+		
+				if(last != s.length())
+				{
+					last = s.length();
+					cout << "length: " << last << endl;
+				}
+
+				s += serial.readString();		
+				if(s.length() == 3)
+				{
+					std::cout << s << std::endl;
+					//pstmt = con->prepareStatement("INSERT INTO Logging(Node, Inst, CMD) VALUES (?, ?, ?)");
+					//stmt->execute("INSERT INTO Logging(Node, Inst, CMD) VALUES (?,?,?)");
+					pstmt->setString(1, s.substr(0,1));
+					pstmt->setString(2, s.substr(1,1));
+					pstmt->setString(3, s.substr(2,1));
+					//pstmt->setString(1, "2");
+					//pstmt->setString(2, "0");
+					//pstmt->setString(3, "5");
+					int result = pstmt->execute();
+					std::cout << result << std::endl;
+					s.clear();
+				
+					//delete pstmt; 
+				}
+			
+
+			
+
+			}
+
+			serial.close();
+
+		} catch(boost::system::system_error& e)
+		{
+			std::cout <<"Error: " << e.what() << std::endl;
+			return 1;
+		}
+
+		delete stmt;
+		delete pstmt;
+		delete con;
+		//driver->threadEnd();
+
+	} catch (sql::SQLException &e) 
+	{
+	  std::cout << "# ERR: SQLException in " << __FILE__;
+	  std::cout << "(" << __FUNCTION__ << ") on line "   << __LINE__ << std::endl;
+	  std::cout << "# ERR: " << e.what();
+	  std::cout << " (MySQL error code: " << e.getErrorCode();
+	  std::cout << ", SQLState: " << e.getSQLState() <<  " )" << std::endl;
+	}
+
+	return 0;
 }
