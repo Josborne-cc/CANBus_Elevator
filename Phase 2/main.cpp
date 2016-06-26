@@ -51,6 +51,9 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
+/*
+Purpose: Reads the pipe to get commands from the webpage
+*/
 void Get_CMD()
 {
 	std::string data;
@@ -58,26 +61,21 @@ void Get_CMD()
 	std::ifstream fd;
 	std::ofstream fo;
 
+	// Clear the pipe 
 	fo.open ("/tmp/cumwart", std::ofstream::out); 
 	fo << data;		
 	fo.close();
-
-	//int fd;
-	//char * myfifo = "/tmp/cumwart";
-	//char buf[100];
-
-	/* open, read, and display the message from the FIFO */
-	//fd = open(myfifo, O_RDONLY);
-	//fd.open ("/tmp/cumwart", std::ifstream::in); 
+ 
 	
 	for(;;)
 	{
-		//read(fd, buf, 100);
-		//printf("Received: %s\n", buf);
+		// Grab the pipe info
 		fd.open ("/tmp/cumwart", std::ifstream::in); 
 		fd >> data;		
 		fd.close();
 
+		// Make sure its knew data
+		// This prevents the command from constantly being reissued
 		if(data!=last)
 		{
 			cout << "pipe: " << data << endl;
@@ -85,11 +83,7 @@ void Get_CMD()
 			last = data;
 		}
 
-		//data.clear();
-
-		
-		
-
+		// Delay so that the program is not using up resources
 		std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
 	}
@@ -97,9 +91,13 @@ void Get_CMD()
 	//fd.close();
 }
 
+/*
+Purpose: Writes all the commands to a mySQL table
+
+*/
 void Write_DB()
 {
-	//try {
+	try {
 		std::string s;
 		sql::mysql::MySQL_Driver *driver;	// Connect to mySQL database
 		sql::Connection *con;			// Allow use of mySQL functions
@@ -136,6 +134,7 @@ void Write_DB()
 				//std::cout << "result: " << result << std::endl;
 			}
 
+			// Delay
 			std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
 		}
@@ -144,27 +143,32 @@ void Write_DB()
 		delete pstmt;
 		delete con;
 
-	/*} catch (sql::SQLException &e) 
+	} catch (sql::SQLException &e) 
 	{
 	  std::cout << "# ERR: SQLException in " << __FILE__;
 	  std::cout << "(" << __FUNCTION__ << ") on line "   << __LINE__ << std::endl;
 	  std::cout << "# ERR: " << e.what();
 	  std::cout << " (MySQL error code: " << e.getErrorCode();
 	  std::cout << ", SQLState: " << e.getSQLState() <<  " )" << std::endl;
-	}*/
+	}
 }
 
+/*
+Purpose: Reads data from the serial line
+!!In version 2 it also writes data to the serial line!!
+*/
 void Read_Serial()
 {
 	std::string s;
 	unsigned int last = 0;
 	
-	//try {
+	try {
+			// Setup the port
 			BufferedAsyncSerial serial("/dev/ttyUSB0",9600);
 	
 			for(;;)
 			{
-		
+				// Gather 3 characters to represent the command
 				if(last != s.length())
 				{
 					last = s.length();
@@ -178,7 +182,7 @@ void Read_Serial()
 					Serial_Recieve.push(s);
 					s.clear();
 				}
-				
+				// Write a command to the line
 				if(!Serial_Send.empty())
 				{
 					std::string temp = Serial_Send.pop();
@@ -187,16 +191,16 @@ void Read_Serial()
 				}
 			
 
-			
+				// Delay
 				std::this_thread::sleep_for(std::chrono::milliseconds(1));
 			}
 
 			serial.close();
 
-		/*} catch(boost::system::system_error& e)
+		} catch(boost::system::system_error& e)
 		{
 			std::cout <<"Error: " << e.what() << std::endl;
 			//return 1;
 			exit(-1);
-		}*/
+		}
 }
