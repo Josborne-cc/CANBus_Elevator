@@ -56,6 +56,11 @@ void Get_CMD()
 	std::string data;
 	std::string last;
 	std::ifstream fd;
+	std::ofstream fo;
+
+	fo.open ("/tmp/cumwart", std::ofstream::out); 
+	fo << data;		
+	fo.close();
 
 	//int fd;
 	//char * myfifo = "/tmp/cumwart";
@@ -176,7 +181,9 @@ void Read_Serial()
 				
 				if(!Serial_Send.empty())
 				{
-					serial.writeString(Serial_Send.pop);
+					std::string temp = Serial_Send.pop();
+					serial.writeString(temp);
+					cout << "Sent: " << temp << endl;
 				}
 			
 
