@@ -32,6 +32,7 @@ void Write_DB();
 void Get_CMD();
 
 Queue Serial_Recieve;
+Queue Serial_Send;
 
 int main(int argc, char* argv[])
 {
@@ -75,6 +76,7 @@ void Get_CMD()
 		if(data!=last)
 		{
 			cout << "pipe: " << data << endl;
+			Serial_Send.push(data);
 			last = data;
 		}
 
@@ -170,6 +172,11 @@ void Read_Serial()
 					std::cout << s << std::endl;
 					Serial_Recieve.push(s);
 					s.clear();
+				}
+				
+				if(!Serial_Send.empty())
+				{
+					serial.writeString(Serial_Send.pop);
 				}
 			
 
