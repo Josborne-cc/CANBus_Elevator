@@ -13,7 +13,12 @@ Phase 1:
     
     Each node uses an Axman development board with a core HCS12 processor.
     
-    To compile this code CodeWarrior 5.1 was used. 
+    Notes on compilation for phase 1:
+    
+    - Code warrior ver. 5.1 was used.
+    - Each node needs to be created as a separate project and the common libraries must be included in each of the respective projects. 
+    
+ 
 
 Phase 2:
 
@@ -27,13 +32,16 @@ Phase 2:
         To use this program the elevator folder must be placed under /var/www/html and the group and passwords file must be placed under /var/www
     Server Comm Program:
         This is for transfering the data from the CAN network to a MySQL database and for recieving controls from the remote PC
-        
+    
+    Notes on compilation for phase 2:
+    
     The server and the server comm program are both run on a linux pc.  I used (ubuntu 16.04).  
     The following must be installed on the computer:
         - boost libraries
         - apache2
         - MySQL
         - PHP with MySQL and LAMP extentions
+    g++ was used to compile the server comm program
 
 Phase 3:
 
@@ -43,9 +51,5 @@ Phase 4:
 
     posted upon completion
     
-Notes on compilation for phase 1:
 
-- Code warrior ver. 5.1 was used.
-
-- Each node needs to be created as a separate project and the common libraries must be included in each of the respective projects. 
 
