@@ -1,0 +1,80 @@
+CREATING THE DATABASE
+
+1) Access the mySQL shell
+	mysql -u root -p
+
+2) Create the Database
+	CREATE DATABASE database name;
+
+3) Show all databases
+	SHOW DATABASES;
+
+4) Delete a database
+	DROP DATABASE database name;
+
+
+USING THE DATABASE
+
+1) Open the database you want to use
+	 USE database name;
+
+2) Show existing mySQL tables
+	SHOW tables
+
+3) Create the table
+
+	CREATE TABLE table_name
+	(
+	column_name1 data_type(size),
+	column_name2 data_type(size),
+	column_name3 data_type(size),
+	....
+	);
+
+
+4) Delete a table
+	DROP TABLE table_name ;
+
+5) Add entry (row) to the table
+	INSERT INTO table_name ( field1, field2,...fieldN )
+                       VALUES
+                       ( value1, value2,...valueN );
+
+6) Search for entry in table
+	SELECT field1, field2,...fieldN table_name1, table_name2...
+	[WHERE Clause]
+	[OFFSET M ][LIMIT N]
+
+	SELECT field1, field2,...fieldN table_name1, table_name2...
+	[WHERE condition1 [AND [OR]] condition2.....
+
+	- You can use one or more tables separated by comma to include various conditions using a WHERE clause, but WHERE clause is an optional part of SELECT command.
+
+	- You can fetch one or more fields in a single SELECT command.
+
+	- You can specify star (*) in place of fields. In this case, SELECT will return all the fields.
+
+	- You can specify any condition using WHERE clause.
+
+	- You can specify an offset using OFFSET from where SELECT will start returning records. By default offset is zero.
+
+	- You can limit the number of returns using LIMIT attribute.
+
+7) Update the table
+	UPDATE table_name SET field1=new-value1, field2=new-value2
+	[WHERE Clause]
+
+8) Delete record from table
+	DELETE FROM table_name [WHERE Clause]
+
+9) Create an index for table entries
+	CREATE UNIQUE INDEX index_name
+ON table_name ( column1, column2,...);
+
+
+
+
+REFERENCES
+1) https://www.digitalocean.com/community/tutorials/a-basic-mysql-tutorial
+
+2) http://www.tutorialspoint.com/mysql/

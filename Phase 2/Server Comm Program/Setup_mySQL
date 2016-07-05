@@ -1,0 +1,52 @@
+/*
+Steps for clean install of mySQL server
+
+Author: Josh Osborne
+*/
+
+1) Naviagte to the directory
+
+2) Unpack the .deb
+	- select the default configuration
+	shell> sudo dpkg -i mysql-apt-config_w.x.y-z_all.deb 
+
+3) Update the system
+	shell> sudo apt-get update
+
+4) Install mySQL
+	shell> sudo apt-get install mysql-server
+
+5) Install the C development libraries
+	shell> sudo apt-get install libmysqlclient-dev
+
+6) Install the connector libraries
+	sudo apt-get install  libmysqlcppconn-dev
+
+7) Install boost
+	sudo apt-get install libboost-all-dev
+
+ADD A USER
+
+1) Create the user
+	CREATE USER 'user'@'localhost' IDENTIFIED BY 'password';
+
+2) Set the permissions
+	GRANT ALL PRIVILEGES ON * . * TO 'user'@'localhost';
+
+3) Finish up
+	FLUSH PRIVILEGES;
+
+Additonal Notes:
+
+1) Check the status of the server
+	shell> sudo service mysql status
+
+2) Start the server
+	shell> sudo service mysql start
+
+3) Stop the server
+	shell> sudo service mysql stop
+
+REFERENCES
+
+1) https://www.digitalocean.com/community/tutorials/a-basic-mysql-tutorial
