@@ -61,26 +61,19 @@ void Get_CMD()
 	std::ifstream fd;
 	std::ofstream fo;
 
-<<<<<<< HEAD
-	fo.open ("/tmp/bryan", std::ofstream::out); 
-=======
+
+
 	// Clear the pipe 
- 
->>>>>>> 975f8e64dfaadba374143f11005aa4fd9d39b1a5
+	fo.open ("/tmp/bryan", std::ofstream::out); 
 	fo << data;		
 	fo.close();
  
 	
 	for(;;)
 	{
-<<<<<<< HEAD
-		//read(fd, buf, 100);
-		//printf("Received: %s\n", buf);
-		fd.open ("/tmp/bryan", std::ifstream::in); 
-=======
+		
 		// Grab the pipe info
-
->>>>>>> 975f8e64dfaadba374143f11005aa4fd9d39b1a5
+		fd.open ("/tmp/bryan", std::ifstream::in); 
 		fd >> data;		
 		fd.close();
 
@@ -98,7 +91,7 @@ void Get_CMD()
 
 	}
 
-	//fd.close();
+
 }
 
 /*
