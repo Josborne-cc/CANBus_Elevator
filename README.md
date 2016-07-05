@@ -1,6 +1,8 @@
 The creation of an elevator with CAN-Bus and ethernet communication
 
-Phase 1: This phase involved the design of a CAN Bus system for transfering data between each node
+Phase 1: 
+
+    This phase involved the design of a CAN Bus system for transfering data between each node
 
     The nodes created were:
     
@@ -14,6 +16,7 @@ Phase 1: This phase involved the design of a CAN Bus system for transfering data
     To compile this code CodeWarrior 5.1 was used. 
 
 Phase 2:
+
     This phase involved the addition of a server so that the elevator could be access from a remote PC. In are case we only needed to access the CAN system from the local network.  Two new programs were created.  A server program for accessing the CAN system from a seperate computer and a communication program for grabbing the data from the CAN network and putting it into a database for access by the server.  A named pipe was also used for controlling the elevator over the network.  
 
     This folder contains three subfolders each of which is a different componet of the project.
