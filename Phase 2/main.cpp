@@ -58,7 +58,7 @@ void Get_CMD()
 	std::ifstream fd;
 	std::ofstream fo;
 
-	fo.open ("/tmp/cumwart", std::ofstream::out); 
+	fo.open ("/tmp/bryan", std::ofstream::out); 
 	fo << data;		
 	fo.close();
 
@@ -74,7 +74,7 @@ void Get_CMD()
 	{
 		//read(fd, buf, 100);
 		//printf("Received: %s\n", buf);
-		fd.open ("/tmp/cumwart", std::ifstream::in); 
+		fd.open ("/tmp/bryan", std::ifstream::in); 
 		fd >> data;		
 		fd.close();
 
