@@ -50,7 +50,7 @@ Phase 3:
 Phase 4:
 
     This phase involved taking the MatLab simulation and converting it to a C program to be run on the system and then combining all the other parts together into a complete system. 
-    - The PID Dummy is now the node that has the motor control feedback system C code. 
+   
     
 
 
