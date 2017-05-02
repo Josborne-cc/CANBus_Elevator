@@ -45,11 +45,12 @@ Phase 2:
 
 Phase 3:
 
-    posted upon completion
+    - This phase involved the simulation of the motor control calculations in MatLab it was completed by another group member
 
 Phase 4:
 
-    posted upon completion
+    This phase involved taking the MatLab simulation and converting it to a C program to be run on the system and then combining all the other parts together into a complete system. 
+    - The PID Dummy is now the node that has the motor control feedback system C code. 
     
 
 
